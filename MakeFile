@@ -1,0 +1,33 @@
+CC = g++
+CFLAGS = -Wall -Wextra -std=c++11 -g
+
+# 빌드 대상 실행 파일
+TARGET = my_program
+
+# 소스 파일 및 개별 오브젝트 파일 목록
+SRCS =  src/Text.cpp src/Game.cpp src/main.cpp src/GameProcess.cpp src/Paddle.cpp
+OBJS = $(SRCS:.cpp=.o)
+
+# 라이브러리 및 헤더 파일 경로
+LIBS = -lSDL2 -lSDL2_ttf
+LIBRARY_PATH = -L./
+
+
+INCLUDES = -I./include
+
+# 빌드 규칙
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) ${LIBRARY_PATH} $(LIBS)
+
+# 오브젝트 파일 생성 규칙
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDES)
+
+run:
+	.\$(TARGET) .\lib\SDL2_ttf.dll
+
+# 정리 규칙
+clean:
+	rm -f $(OBJS) $(TARGET)
