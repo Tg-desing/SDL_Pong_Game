@@ -107,26 +107,29 @@ void Game::Run(SDL_Renderer *pRenderer)
                     switch (event.key.keysym.sym)
                     {
                     case SDLK_SPACE:
-                        isGameStart = true;
                         gameProcess = new GameProcess(1);
+                        gameProcess->Init(pRenderer);
+                        isGameStart = true;
                         break;
                     }
                 }
             }
             else
             {
-                gameProcess->Init(pRenderer);
-
+                gameProcess->Run(event);
+                gameProcess->UpdatePos();
+                gameProcess->Update(pRenderer);
                 // GameProcess->Run();
             }
         }
         // GameProcess->Update();
         SDL_RenderPresent(pRenderer);
         curticks = SDL_GetTicks();
-        fps = 1000.0 / (curticks - lastticks);
+        fps = 1000.0 / 60.0;
+        int sleepTime = fps - (curticks - lastticks);
         // sleep process
         lastticks = curticks;
         framecount++;
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
     }
 }

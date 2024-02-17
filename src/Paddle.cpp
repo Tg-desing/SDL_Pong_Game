@@ -16,9 +16,9 @@ void Paddle::UpdatePosY(int direction)
 {
     // direction 1 is up, -1 is down
     if (direction == 1)
-        y += 10;
+        y += 20;
     else
-        y -= 10;
+        y -= 20;
 }
 
 void Paddle::Render(SDL_Renderer *pRenderer)

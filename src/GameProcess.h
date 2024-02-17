@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "Paddle.h"
+#include "Queue.h"
 
 class GameProcess
 {
@@ -12,6 +13,10 @@ public:
     ~GameProcess();
 
 private:
+    bool isWKeyPressed = false;
+    bool isSKeyPressed = false;
+    bool isUpKeyPressed = false;
+    bool isDownKeyPressed = false;
     Paddle **pPaddles = new Paddle *[2];
     // paddle object list
     // ball object
@@ -29,8 +34,9 @@ private:
 
 public:
     void Init(SDL_Renderer *pRenderer);
-    void Run();
-    void Update();
+    void Run(SDL_Event event);
+    void Update(SDL_Renderer *pRenderer);
+    void UpdatePos();
 
 public:
     int level;
