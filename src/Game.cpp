@@ -6,6 +6,8 @@
 #include "Text.h"
 #include "GameProcess.h"
 #include <SDL2/SDL2_TTF/SDL_ttf.h>
+#include "Ball.h"
+#include "Vec2.h"
 
 static const int WIDTH = 800;
 static const int HEIGHT = 600;
@@ -18,7 +20,8 @@ float Game::fps = 0;
 int Game::framecount = 0;
 int Game::done = 0;
 SDL_Event Game::event;
-Game::Game()
+Game::Game() : gameProcess(NULL),
+               pBall(NULL)
 {
 }
 
@@ -94,6 +97,9 @@ void Game::Run(SDL_Renderer *pRenderer)
     int isGameStart = false;
     while (!done)
     {
+        SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
+        SDL_RenderClear(pRenderer);
+
         while (SDL_PollEvent(&event))
         {
             if (!isGameStart)
@@ -110,6 +116,8 @@ void Game::Run(SDL_Renderer *pRenderer)
                         gameProcess = new GameProcess(1);
                         gameProcess->Init(pRenderer);
                         isGameStart = true;
+                        pBall = new Ball(Vec2((float)WIDTH / 2.0f - 10.0f, (float)HEIGHT / 2.0f - 10.0f));
+                        pBall->Init();
                         break;
                     }
                 }
@@ -118,14 +126,22 @@ void Game::Run(SDL_Renderer *pRenderer)
             {
                 gameProcess->Run(event);
                 gameProcess->UpdatePos();
-                gameProcess->Update(pRenderer);
+
                 // GameProcess->Run();
             }
         }
+
+        if (isGameStart)
+        {
+            pBall->UpdatePos();
+            pBall->Render(pRenderer);
+
+            gameProcess->Update(pRenderer);
+            SDL_RenderPresent(pRenderer);
+        }
         // GameProcess->Update();
-        SDL_RenderPresent(pRenderer);
         curticks = SDL_GetTicks();
-        fps = 1000.0 / 60.0;
+        fps = 1000.0 / 30.0;
         int sleepTime = fps - (curticks - lastticks);
         // sleep process
         lastticks = curticks;

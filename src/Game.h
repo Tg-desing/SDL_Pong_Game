@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_TTF/SDL_ttf.h>
 #include "GameProcess.h"
+#include "Ball.h"
 
 class Game
 {
@@ -25,4 +26,5 @@ public:
 
 private:
     GameProcess *gameProcess;
+    Ball *pBall;
 };

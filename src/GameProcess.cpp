@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include "GameProcess.h"
 #include "Paddle.h"
+#include "Ball.h"
 
 GameProcess::GameProcess() {}
 GameProcess::~GameProcess() {}
@@ -11,9 +12,6 @@ void GameProcess::Init(SDL_Renderer *pRenderer)
     setPaddles();
     SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
     SDL_RenderClear(pRenderer);
-
-    pPaddles[0]->Render(pRenderer);
-    pPaddles[1]->Render(pRenderer);
 }
 
 void GameProcess::Run(SDL_Event event)
@@ -54,6 +52,8 @@ void GameProcess::Run(SDL_Event event)
             break;
         }
         break;
+    default:
+        break;
     }
 }
 
@@ -78,8 +78,6 @@ void GameProcess::UpdatePos()
 }
 void GameProcess::Update(SDL_Renderer *pRenderer)
 {
-    SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
-    SDL_RenderClear(pRenderer);
     pPaddles[0]->Render(pRenderer);
     pPaddles[1]->Render(pRenderer);
 }

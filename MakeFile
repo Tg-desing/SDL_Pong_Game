@@ -5,7 +5,7 @@ CFLAGS = -Wall -Wextra -std=c++11 -g
 TARGET = my_program
 
 # 소스 파일 및 개별 오브젝트 파일 목록
-SRCS =  src/Text.cpp src/Game.cpp src/main.cpp src/GameProcess.cpp src/Paddle.cpp
+SRCS =  src/Text.cpp src/Game.cpp src/main.cpp src/GameProcess.cpp src/Paddle.cpp src/Ball.cpp 
 OBJS = $(SRCS:.cpp=.o)
 
 # 라이브러리 및 헤더 파일 경로
