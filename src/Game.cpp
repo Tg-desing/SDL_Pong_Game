@@ -6,14 +6,15 @@
 #include "Text.h"
 #include "GameProcess.h"
 #include <SDL2/SDL2_TTF/SDL_ttf.h>
-#include "Ball.h"
 #include "Vec2.h"
 
-static const int WIDTH = 800;
-static const int HEIGHT = 600;
-
+int WIDTH = 900;
+int HEIGHT = 600;
+int BALLWIDTH = 10;
+int BALLHEIGHT = 10;
 Game *Game::instance = NULL;
 
+#include "Ball.h"
 int Game::curticks = 0;
 int Game::lastticks = 0;
 float Game::fps = 0;
@@ -114,9 +115,10 @@ void Game::Run(SDL_Renderer *pRenderer)
                     {
                     case SDLK_SPACE:
                         gameProcess = new GameProcess(1);
+                        setPaddles();
                         gameProcess->Init(pRenderer);
                         isGameStart = true;
-                        pBall = new Ball(Vec2((float)WIDTH / 2.0f - 10.0f, (float)HEIGHT / 2.0f - 10.0f));
+                        pBall = new Ball(Vec2((float)WIDTH / 2.0f - (float)BALLWIDTH / 2.0f, (float)HEIGHT / 2.0f - (float)BALLHEIGHT / 2.0f));
                         pBall->Init();
                         break;
                     }
@@ -125,7 +127,7 @@ void Game::Run(SDL_Renderer *pRenderer)
             else
             {
                 gameProcess->Run(event);
-                gameProcess->UpdatePos();
+                gameProcess->UpdatePos(pPaddles);
 
                 // GameProcess->Run();
             }
@@ -133,10 +135,10 @@ void Game::Run(SDL_Renderer *pRenderer)
 
         if (isGameStart)
         {
-            pBall->UpdatePos();
+            pBall->UpdatePos(pPaddles);
             pBall->Render(pRenderer);
 
-            gameProcess->Update(pRenderer);
+            gameProcess->Update(pRenderer, pPaddles);
             SDL_RenderPresent(pRenderer);
         }
         // GameProcess->Update();

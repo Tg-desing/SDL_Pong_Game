@@ -9,7 +9,6 @@ GameProcess::GameProcess(int level) : level(level) {}
 
 void GameProcess::Init(SDL_Renderer *pRenderer)
 {
-    setPaddles();
     SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
     SDL_RenderClear(pRenderer);
 }
@@ -57,7 +56,7 @@ void GameProcess::Run(SDL_Event event)
     }
 }
 
-void GameProcess::UpdatePos()
+void GameProcess::UpdatePos(Paddle **pPaddles)
 {
     if (isWKeyPressed)
     {
@@ -76,7 +75,7 @@ void GameProcess::UpdatePos()
         pPaddles[1]->UpdatePosY(1);
     }
 }
-void GameProcess::Update(SDL_Renderer *pRenderer)
+void GameProcess::Update(SDL_Renderer *pRenderer, Paddle **pPaddles)
 {
     pPaddles[0]->Render(pRenderer);
     pPaddles[1]->Render(pRenderer);

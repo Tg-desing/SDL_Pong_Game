@@ -18,6 +18,11 @@ public:
         return Vec2(x * s, y * s);
     }
 
+    Vec2 operator*(Vec2 const &v)
+    {
+        return Vec2(x * v.x, y * v.y);
+    }
+
     Vec2 &operator+=(Vec2 const &v)
     {
         x += v.x;

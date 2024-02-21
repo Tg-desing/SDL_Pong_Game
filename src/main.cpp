@@ -6,8 +6,6 @@
 
 #undef main
 
-const int WIDTH = 900, HEIGHT = 600;
-
 int main()
 {
         SDL_Window *pWindow = NULL;

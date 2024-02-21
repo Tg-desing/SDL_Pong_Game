@@ -1,7 +1,11 @@
+#ifndef GAME_H
+#define GAME_H
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_TTF/SDL_ttf.h>
 #include "GameProcess.h"
 #include "Ball.h"
+#include "Paddle.h"
 
 class Game
 {
@@ -24,7 +28,21 @@ public:
     static SDL_Event event;
     static int done;
 
+public:
+    void setPaddles()
+    {
+        Paddle *paddle1 = new Paddle(1);
+        paddle1->Init();
+        Paddle *paddle2 = new Paddle(2);
+        paddle2->Init();
+        pPaddles[0] = paddle1;
+        pPaddles[1] = paddle2;
+    };
+
 private:
     GameProcess *gameProcess;
     Ball *pBall;
+    Paddle **pPaddles = new Paddle *[2];
 };
+
+#endif
