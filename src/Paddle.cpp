@@ -1,7 +1,10 @@
 #include <SDL2/SDL.h>
 #include "Paddle.h"
 
-Paddle::Paddle(int playerNum) : x(50), y(10), w(20), h(100), playerNum(playerNum) {}
+extern int WIDTH;
+extern int HEIGHT;
+
+Paddle::Paddle(int playerNum) : x(50), y((HEIGHT / 2)), w(20), h(100), playerNum(playerNum) {}
 
 Paddle::~Paddle() {}
 
@@ -10,15 +13,21 @@ void Paddle::Init()
     if (playerNum == 1)
         x = 50;
     else
-        x = 750;
+        x = WIDTH - 50 - w;
 }
-void Paddle::UpdatePosY(int direction)
+void Paddle::UpdatePosY(int direction, int dt)
 {
     // direction 1 is up, -1 is down
     if (direction == 1)
-        y += 20;
+    {
+        if (y <= (HEIGHT - h))
+            y += velocity * dt;
+    }
     else
-        y -= 20;
+    {
+        if (y >= 0)
+            y -= velocity * dt;
+    }
 }
 
 void Paddle::Render(SDL_Renderer *pRenderer)

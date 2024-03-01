@@ -15,10 +15,11 @@ private:
     int y;
     int w;
     int h;
+    float velocity = 0.5f;
 
 public:
     void Init();
-    void UpdatePosY(int direction);
+    void UpdatePosY(int direction, int dt);
     void Render(SDL_Renderer *pRenderer);
 
 public:

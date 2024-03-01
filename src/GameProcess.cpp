@@ -56,23 +56,23 @@ void GameProcess::Run(SDL_Event event)
     }
 }
 
-void GameProcess::UpdatePos(Paddle **pPaddles)
+void GameProcess::UpdatePos(Paddle **pPaddles, int dt)
 {
     if (isWKeyPressed)
     {
-        pPaddles[0]->UpdatePosY(-1);
+        pPaddles[0]->UpdatePosY(-1, dt);
     }
     if (isSKeyPressed)
     {
-        pPaddles[0]->UpdatePosY(1);
+        pPaddles[0]->UpdatePosY(1, dt);
     }
     if (isUpKeyPressed)
     {
-        pPaddles[1]->UpdatePosY(-1);
+        pPaddles[1]->UpdatePosY(-1, dt);
     }
     if (isDownKeyPressed)
     {
-        pPaddles[1]->UpdatePosY(1);
+        pPaddles[1]->UpdatePosY(1, dt);
     }
 }
 void GameProcess::Update(SDL_Renderer *pRenderer, Paddle **pPaddles)

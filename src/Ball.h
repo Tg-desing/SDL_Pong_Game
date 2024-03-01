@@ -7,11 +7,12 @@
 
 class Ball
 {
-public:
-    Vec2 velocity = Vec2(0, 0);
-    Vec2 DIRECTION = Vec2(1.0f, -1.0f);
-    float movement;
+private:
+    Vec2 velocity;
     Vec2 pos;
+    float bounceAngle;
+    Vec2 DIRECTION;
+    float movement;
 
 public:
     Ball(Vec2 ballPos);
@@ -20,6 +21,12 @@ public:
     void Init();
     void UpdatePos(Paddle **pPaddles);
     void Render(SDL_Renderer *pRenderer);
+
+public:
+    Vec2 GetPos()
+    {
+        return pos;
+    }
 
 private:
     int IsPaddleCollide(Paddle *paddle);

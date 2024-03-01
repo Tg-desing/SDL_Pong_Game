@@ -1,17 +1,18 @@
 #include "Ball.h"
+#include <cmath>
 #include <stdio.h>
 #include "Vec2.h"
 #include "Paddle.h"
+using namespace std;
 
 extern int BALLWIDTH;
 extern int BALLHEIGHT;
 extern int HEIGHT;
-Ball::Ball(Vec2 ballPos) : pos(ballPos) {}
+Ball::Ball(Vec2 ballPos) : velocity(Vec2(10.0f, 10.0f)), pos(ballPos), bounceAngle(0.0f), DIRECTION(Vec2(1.0f, 0.0f)) {}
+Ball::~Ball() {}
 
 void Ball::Init()
 {
-    velocity.x = 5.0f;
-    velocity.y = 1.5f;
 }
 
 void Ball::UpdatePos(Paddle **pPaddles)
@@ -23,25 +24,24 @@ void Ball::UpdatePos(Paddle **pPaddles)
 
     if (IsPaddleCollide(pPaddles[0]) == 1)
     {
-        DIRECTION.x *= -1.0f;
+        DIRECTION.y = -sin(bounceAngle * 3.14f / 180.0f);
+        DIRECTION.x = cos(bounceAngle * 3.14f / 180.0f);
     }
 
     if (IsPaddleCollide(pPaddles[1]) == 1)
     {
-        DIRECTION.x *= -1.0f;
+        DIRECTION.y = -sin(bounceAngle * 3.14f / 180.0f);
+        DIRECTION.x = -cos(bounceAngle * 3.14f / 180.0f);
     }
     pos += velocity * DIRECTION;
 }
 
 int Ball::IsWallCollide()
 {
-    static int flag = 1;
-    if ((pos.y <= 0 || pos.y >= HEIGHT - BALLHEIGHT) && flag)
+    if ((pos.y <= 0 || pos.y >= HEIGHT - BALLHEIGHT))
     {
-        flag = 0;
         return 1;
     }
-    flag = 1;
     return 0;
 }
 
@@ -52,24 +52,37 @@ int Ball::IsPaddleCollide(Paddle *paddle)
 
     if (paddle->GetPlayerNum() == 1)
     {
-        float collidePosX = paddlePos.x + paddleSize.x;
         float minCollidePosY = paddlePos.y;
-        float maxCollidePosY = paddlePos.y + paddleSize.y;
+        float maxCollidePosY = paddlePos.y + paddleSize.y - (float)BALLWIDTH;
 
-        if (pos.x <= collidePosX && pos.y >= minCollidePosY && pos.y <= maxCollidePosY)
-            return 1;
+        if (pos.y <= maxCollidePosY && pos.y >= minCollidePosY)
+        {
+            if (pos.x <= (paddlePos.x + paddleSize.x) && pos.x > paddlePos.x)
+            {
+                float relativeIntersectY = (paddlePos.y + paddleSize.y / 2) - pos.y;
+                float normalizedRelativeIntersectY = relativeIntersectY / (paddleSize.y / 2);
+                bounceAngle = normalizedRelativeIntersectY * 80.0f;
+                return 1;
+            }
+        }
     }
     else
     {
-        float collidePosX = paddlePos.x;
 
         float minCollidePosY = paddlePos.y;
-        float maxCollidePosY = paddlePos.y + paddleSize.y;
+        float maxCollidePosY = paddlePos.y + paddleSize.y - (float)BALLWIDTH;
 
-        if ((pos.x + BALLWIDTH) >= collidePosX && pos.y >= minCollidePosY && pos.y <= maxCollidePosY)
-            return 1;
+        if (pos.y <= maxCollidePosY && pos.y >= minCollidePosY)
+        {
+            if (pos.x >= paddlePos.x && pos.x < (paddlePos.x + paddleSize.x))
+            {
+                float relativeIntersectY = (paddlePos.y + paddleSize.y / 2) - pos.y;
+                float normalizedRelativeIntersectY = relativeIntersectY / (paddleSize.y / 2);
+                bounceAngle = normalizedRelativeIntersectY * 80.0f;
+                return 1;
+            }
+        }
     }
-
     return 0;
 }
 void Ball::Render(SDL_Renderer *pRenderer)

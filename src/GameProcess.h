@@ -25,7 +25,7 @@ public:
     void Init(SDL_Renderer *pRenderer);
     void Run(SDL_Event event);
     void Update(SDL_Renderer *pRenderer, Paddle **pPaddles);
-    void UpdatePos(Paddle **pPaddles);
+    void UpdatePos(Paddle **pPaddles, int dt);
 
 public:
     int level;
