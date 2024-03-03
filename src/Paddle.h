@@ -15,7 +15,7 @@ private:
     int y;
     int w;
     int h;
-    float velocity = 0.5f;
+    float velocity = 2.0f;
 
 public:
     void Init();

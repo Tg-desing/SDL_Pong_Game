@@ -10,15 +10,16 @@ int main()
 {
         SDL_Window *pWindow = NULL;
         SDL_Renderer *pRenderer = NULL;
-        TTF_Font *pFont = NULL;
+        TTF_Font *pTextFont = NULL;
+        TTF_Font *pScoreFont = NULL;
 
         Game *game = Game::GetInstance();
-        int initComplte = game->init(pWindow, pRenderer, pFont);
+        int initComplte = game->init(pWindow, pRenderer, pTextFont, pScoreFont);
         if (initComplte == 0)
         {
                 printf("Init failed");
                 return 0;
         }
-        game->Render(pRenderer, pFont);
-        game->Run(pRenderer, pFont);
+        game->Render(pRenderer, pTextFont);
+        game->Run(pRenderer, pScoreFont);
 }

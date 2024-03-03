@@ -3,10 +3,12 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include "enum.h"
 #include "Game.h"
 #include "Text.h"
 #include "GameProcess.h"
 #include <SDL2/SDL2_TTF/SDL_ttf.h>
+#include <filesystem>
 #include "Vec2.h"
 
 int WIDTH = 900;
@@ -24,7 +26,8 @@ int Game::done = 0;
 int Game::durationTime = 0;
 SDL_Event Game::event;
 Game::Game() : gameProcess(NULL),
-               pBall(NULL)
+               pBall(NULL),
+               currentFilePath(fs::current_path())
 {
 }
 
@@ -41,7 +44,7 @@ Game *Game::GetInstance()
     return instance;
 }
 
-bool Game::init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pFont)
+bool Game::init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pTextFont, TTF_Font *&pScoreFont)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -63,14 +66,25 @@ bool Game::init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pFont
 
     if (TTF_Init() == -1)
     {
-        printf("SDL setting TTF failed");
+        printf("SDL setting TTF failed\n");
         return false;
     }
 
-    pFont = TTF_OpenFont("C:\\Windows\\Fonts\\arial.ttf", 28);
-    if (pFont == nullptr)
+    fs::path textFontPath = currentFilePath / "text" / "emulogic-font" / "Emulogic-zrEw.ttf";
+    pTextFont = TTF_OpenFont(textFontPath.string().c_str(), 56);
+
+    if (pTextFont == nullptr)
     {
-        printf("Font load failed");
+        printf("Font load failed\n");
+        return false;
+    }
+
+    fs::path scoreFontPath = currentFilePath / "text" / "pong-score" / "pong-score.ttf";
+    // pScoreFont = TTF_OpenFont("C:\\Users\\Taegon\\Documents\\GitHub\\SDL_practice\\text\\pong-score\\pong-score.ttf", 28);
+    pScoreFont = TTF_OpenFont(scoreFontPath.string().c_str(), 28);
+    if (pScoreFont == nullptr)
+    {
+        printf("Font load failed\n");
         return false;
     }
 
@@ -85,59 +99,78 @@ bool Game::init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pFont
 
 void Game::AddScore()
 {
-    if (gameWinFlag == 1)
+    if (gameWinSide == WINSIDE::LEFT)
     {
-        score[0]++;
+        score[(int)(WINSIDE::LEFT)]++;
     }
-    else if (gameWinFlag == 2)
+    else if (gameWinSide == WINSIDE::RIGHT)
     {
-        score[1]++;
+        score[static_cast<int>(WINSIDE::RIGHT)]++;
     }
 }
 
-int Game::IsGameScored()
+bool Game::IsGameScored()
 {
     if (pBall->GetPos().x < 0)
     {
-        gameWinFlag = 2;
-        return 1;
+        gameWinSide = WINSIDE::RIGHT;
+        return true;
     }
     else if (pBall->GetPos().x > WIDTH - BALLWIDTH)
     {
-        gameWinFlag = 1;
-        return 1;
+        gameWinSide = WINSIDE::LEFT;
+        return true;
     }
-    return 0;
+    return false;
 }
 
-void Game::RenderScoreText(SDL_Renderer *pRenderer, TTF_Font *pFont)
+void Game::RenderScoreText(SDL_Renderer *pRenderer, TTF_Font *pScoreFont)
 {
     SDL_TextTexture *textRenderer = new SDL_TextTexture();
-    textRenderer->RenderText(pRenderer, pFont, std::to_string(score[0]).c_str(), {255, 255, 255, 255}, 100, 5);
-    textRenderer->RenderText(pRenderer, pFont, std::to_string(score[1]).c_str(), {255, 255, 255, 255}, WIDTH - 100, 5);
+    textRenderer->RenderText(pRenderer, pScoreFont, std::to_string(score[static_cast<int>(WINSIDE::LEFT)]).c_str(), {255, 255, 255, 255}, 200, 5);
+    textRenderer->RenderText(pRenderer, pScoreFont, std::to_string(score[static_cast<int>(WINSIDE::RIGHT)]).c_str(), {255, 255, 255, 255}, WIDTH - 200, 5);
 }
 
-void Game::Render(SDL_Renderer *pRenderer, TTF_Font *pFont)
+void Game::Render(SDL_Renderer *pRenderer, TTF_Font *pTextFont)
 {
     SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
     SDL_RenderClear(pRenderer);
 
     SDL_TextTexture *textRenderer = new SDL_TextTexture();
-    textRenderer->RenderText(pRenderer, pFont, "Pong Game", {255, 255, 255, 255}, 50, 50);
+    textRenderer->RenderText(pRenderer, pTextFont, "Pong Game", {255, 255, 255, 255}, WIDTH / 2 - 250, HEIGHT / 2 - 100);
+    TTF_SetFontSize(pTextFont, 28);
+    textRenderer->RenderText(pRenderer, pTextFont, "Press Space to start", {255, 255, 255, 255}, WIDTH / 2 - 300, HEIGHT / 2);
 
     SDL_RenderPresent(pRenderer);
 }
 
-void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pFont)
+void Game::RenderEnd(SDL_Renderer *pRenderer, TTF_Font *pTextFont)
+{
+}
+
+void Game::GameBackgroundRender(SDL_Renderer *pRenderer)
+{
+    SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(pRenderer);
+
+    int middleLineX = WIDTH / 2 - 5;
+    for (int i = 0; i < HEIGHT; i += 15)
+    {
+        SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 255);
+        SDL_Rect rect = {middleLineX, i, 10, 10};
+        SDL_RenderDrawRect(pRenderer, &rect);
+        SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(pRenderer, &rect);
+    }
+}
+
+void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont)
 {
     lastticks = curticks;
     int isGameStart = false;
     while (!done)
     {
-        SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
-        SDL_RenderClear(pRenderer);
-        SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 255);
-        SDL_RenderDrawLine(pRenderer, WIDTH / 2, 0, WIDTH / 2, HEIGHT);
+        GameBackgroundRender(pRenderer);
 
         while (SDL_PollEvent(&event))
         {
@@ -157,7 +190,7 @@ void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pFont)
                         gameProcess->Init(pRenderer);
                         isGameStart = true;
                         pBall = new Ball(Vec2((float)WIDTH / 2.0 - (float)BALLWIDTH / 2.0f, (float)HEIGHT / 2.0f - (float)BALLHEIGHT / 2.0f));
-                        pBall->Init();
+                        pBall->Init(WINSIDE::NONE);
                         break;
                     }
                 }
@@ -165,8 +198,6 @@ void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pFont)
             else
             {
                 gameProcess->Run(event);
-
-                // GameProcess->Run();
             }
         }
 
@@ -180,13 +211,13 @@ void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pFont)
             {
                 delete pBall;
                 pBall = new Ball(Vec2((float)WIDTH / 2.0f - (float)BALLWIDTH / 2.0f, (float)HEIGHT / 2.0f - (float)BALLHEIGHT / 2.0f));
-                pBall->Init();
+                pBall->Init(gameWinSide);
                 AddScore();
-                gameWinFlag = 0;
+                gameWinSide = WINSIDE::NONE;
             }
 
             gameProcess->Update(pRenderer, pPaddles);
-            RenderScoreText(pRenderer, pFont);
+            RenderScoreText(pRenderer, pScoreFont);
             SDL_RenderPresent(pRenderer);
         }
         // GameProcess->Update();

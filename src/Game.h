@@ -3,9 +3,15 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_TTF/SDL_ttf.h>
+#include <filesystem>
+#include "enum.h"
 #include "GameProcess.h"
 #include "Ball.h"
 #include "Paddle.h"
+
+namespace fs = std::filesystem;
+
+class Ball;
 
 class Game
 {
@@ -16,9 +22,11 @@ private:
 
 public:
     static Game *GetInstance();
-    bool init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pFont);
-    void Render(SDL_Renderer *pRenderer, TTF_Font *pFont);
-    void Run(SDL_Renderer *pRenderer, TTF_Font *pFont);
+    bool init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pTextFont, TTF_Font *&pScoreFont);
+    void Render(SDL_Renderer *pRenderer, TTF_Font *pTextFont);
+    void Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont);
+    void GameBackgroundRender(SDL_Renderer *pRenderer);
+    void RenderEnd(SDL_Renderer *pRenderer, TTF_Font *pTextFont);
 
 public:
     static int lastticks;
@@ -42,16 +50,17 @@ public:
 
     void AddScore();
 
-    int IsGameScored();
+    bool IsGameScored();
 
-    void RenderScoreText(SDL_Renderer *pRenderer, TTF_Font *pFont);
+    void RenderScoreText(SDL_Renderer *pRenderer, TTF_Font *pScoreFont);
 
 private:
     GameProcess *gameProcess;
     Ball *pBall;
     Paddle **pPaddles = new Paddle *[2];
     int score[2] = {0, 0};
-    int gameWinFlag = 0;
+    WINSIDE gameWinSide = WINSIDE::NONE;
+    fs::path currentFilePath;
 };
 
 #endif
