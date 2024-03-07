@@ -21,5 +21,5 @@ int main()
                 return 0;
         }
         game->Render(pRenderer, pTextFont);
-        game->Run(pRenderer, pScoreFont);
+        game->Run(pRenderer, pScoreFont, pTextFont);
 }

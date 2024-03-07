@@ -17,6 +17,8 @@ private:
     float movement;
     wallCollideType collideType;
     bool firstCollide;
+    static float velocityIncrease;
+    static float MAX_VELOCITY;
 
 public:
     Ball(Vec2 ballPos);

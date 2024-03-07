@@ -15,6 +15,7 @@ int WIDTH = 900;
 int HEIGHT = 600;
 int BALLWIDTH = 10;
 int BALLHEIGHT = 10;
+int WINSCORE = 5;
 Game *Game::instance = NULL;
 
 #include "Ball.h"
@@ -27,7 +28,9 @@ int Game::durationTime = 0;
 SDL_Event Game::event;
 Game::Game() : gameProcess(NULL),
                pBall(NULL),
-               currentFilePath(fs::current_path())
+               currentFilePath(fs::current_path()),
+               winscore(WINSCORE),
+               winner(WINSIDE::NONE)
 {
 }
 
@@ -80,7 +83,6 @@ bool Game::init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pText
     }
 
     fs::path scoreFontPath = currentFilePath / "text" / "pong-score" / "pong-score.ttf";
-    // pScoreFont = TTF_OpenFont("C:\\Users\\Taegon\\Documents\\GitHub\\SDL_practice\\text\\pong-score\\pong-score.ttf", 28);
     pScoreFont = TTF_OpenFont(scoreFontPath.string().c_str(), 28);
     if (pScoreFont == nullptr)
     {
@@ -131,6 +133,21 @@ void Game::RenderScoreText(SDL_Renderer *pRenderer, TTF_Font *pScoreFont)
     textRenderer->RenderText(pRenderer, pScoreFont, std::to_string(score[static_cast<int>(WINSIDE::RIGHT)]).c_str(), {255, 255, 255, 255}, WIDTH - 200, 5);
 }
 
+bool Game::CheckWinner()
+{
+    if (score[static_cast<int>(WINSIDE::LEFT)] == WINSCORE)
+    {
+        winner = WINSIDE::LEFT;
+        return true;
+    }
+    else if (score[static_cast<int>(WINSIDE::RIGHT)] == WINSCORE)
+    {
+        winner = WINSIDE::RIGHT;
+        return true;
+    }
+    return false;
+}
+
 void Game::Render(SDL_Renderer *pRenderer, TTF_Font *pTextFont)
 {
     SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
@@ -146,6 +163,17 @@ void Game::Render(SDL_Renderer *pRenderer, TTF_Font *pTextFont)
 
 void Game::RenderEnd(SDL_Renderer *pRenderer, TTF_Font *pTextFont)
 {
+    SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(pRenderer);
+    SDL_TextTexture *textRender = new SDL_TextTexture();
+    if (winner == WINSIDE::LEFT)
+        textRender->RenderText(pRenderer, pTextFont, "PLAYER 1 WIN!", {255, 255, 255, 255}, WIDTH / 2 - 150, HEIGHT / 2 - 100);
+    else
+        textRender->RenderText(pRenderer, pTextFont, "PLAYER 2 WIN!", {255, 255, 255, 255}, WIDTH / 2 - 150, HEIGHT / 2 - 100);
+    TTF_SetFontSize(pTextFont, 28);
+    textRender->RenderText(pRenderer, pTextFont, "Press Space to restart", {255, 255, 255, 255}, WIDTH / 2 - 300, HEIGHT / 2);
+
+    SDL_RenderPresent(pRenderer);
 }
 
 void Game::GameBackgroundRender(SDL_Renderer *pRenderer)
@@ -164,17 +192,21 @@ void Game::GameBackgroundRender(SDL_Renderer *pRenderer)
     }
 }
 
-void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont)
+void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont, TTF_Font *pTextFont)
 {
     lastticks = curticks;
     int isGameStart = false;
+    int isGameEnd = false;
     while (!done)
     {
-        GameBackgroundRender(pRenderer);
+        if (isGameStart && !isGameEnd)
+            GameBackgroundRender(pRenderer);
+        else if (isGameEnd && !isGameStart)
+            RenderEnd(pRenderer, pTextFont);
 
         while (SDL_PollEvent(&event))
         {
-            if (!isGameStart)
+            if (!isGameStart || isGameEnd)
             {
                 switch (event.type)
                 {
@@ -189,9 +221,10 @@ void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont)
                         setPaddles();
                         gameProcess->Init(pRenderer);
                         isGameStart = true;
+                        isGameEnd = false;
                         pBall = new Ball(Vec2((float)WIDTH / 2.0 - (float)BALLWIDTH / 2.0f, (float)HEIGHT / 2.0f - (float)BALLHEIGHT / 2.0f));
                         pBall->Init(WINSIDE::NONE);
-                        break;
+                        continue;
                     }
                 }
             }
@@ -218,8 +251,19 @@ void Game::Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont)
 
             gameProcess->Update(pRenderer, pPaddles);
             RenderScoreText(pRenderer, pScoreFont);
-            SDL_RenderPresent(pRenderer);
+            if (CheckWinner())
+            {
+                isGameStart = false;
+                isGameEnd = true;
+                delete pBall;
+                delete gameProcess;
+                delete pPaddles[0];
+                delete pPaddles[1];
+                score[0] = 0;
+                score[1] = 1;
+            }
         }
+        SDL_RenderPresent(pRenderer);
         // GameProcess->Update();
         curticks = SDL_GetTicks();
         durationTime = curticks - lastticks;

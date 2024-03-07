@@ -24,9 +24,10 @@ public:
     static Game *GetInstance();
     bool init(SDL_Window *&pWindow, SDL_Renderer *&pRenderer, TTF_Font *&pTextFont, TTF_Font *&pScoreFont);
     void Render(SDL_Renderer *pRenderer, TTF_Font *pTextFont);
-    void Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont);
+    void Run(SDL_Renderer *pRenderer, TTF_Font *pScoreFont, TTF_Font *pTextFont);
     void GameBackgroundRender(SDL_Renderer *pRenderer);
     void RenderEnd(SDL_Renderer *pRenderer, TTF_Font *pTextFont);
+    bool CheckWinner();
 
 public:
     static int lastticks;
@@ -61,6 +62,8 @@ private:
     int score[2] = {0, 0};
     WINSIDE gameWinSide = WINSIDE::NONE;
     fs::path currentFilePath;
+    const int winscore;
+    WINSIDE winner;
 };
 
 #endif

@@ -10,6 +10,9 @@ using namespace std;
 extern int BALLWIDTH;
 extern int BALLHEIGHT;
 extern int HEIGHT;
+
+float Ball::MAX_VELOCITY = 13.0f;
+float Ball::velocityIncrease = 0.5f;
 Ball::Ball(Vec2 ballPos) : velocity(10.0f), pos(ballPos), bounceAngle(0.0f), DIRECTION(Vec2(1.0f, 0.0f)), collideType(wallCollideType::NONE), firstCollide(false) {}
 Ball::~Ball() {}
 
@@ -44,12 +47,14 @@ void Ball::UpdatePos(Paddle **pPaddles)
     {
         DIRECTION.y = -sin(bounceAngle * 3.14f / 180.0f);
         DIRECTION.x = cos(bounceAngle * 3.14f / 180.0f);
+        velocity <= MAX_VELOCITY ? velocity += velocityIncrease : velocity = MAX_VELOCITY;
     }
 
     if (IsPaddleCollide(pPaddles[1]) == 1)
     {
         DIRECTION.y = -sin(bounceAngle * 3.14f / 180.0f);
         DIRECTION.x = -cos(bounceAngle * 3.14f / 180.0f);
+        velocity <= MAX_VELOCITY ? velocity += velocityIncrease : velocity = MAX_VELOCITY;
     }
     pos += DIRECTION * velocity;
 }
